@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Music Story Card</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700&family=Kanit:wght@400;600&family=Mitr:wght@400;600&family=Playfair+Display:wght@600;800&family=Pacifico&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff;--fg:#1c1c1e;--card:#f2f2f7;--ac:#fa2d48;--bd:#d8d8de;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#000;--fg:#f5f5f7;--card:#1c1c1e;--bd:#3a3a3c}}
+:root[data-theme="dark"]{--bg:#000;--fg:#f5f5f7;--card:#1c1c1e;--bd:#3a3a3c}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font-family:Prompt,system-ui,sans-serif;max-width:480px;margin:0 auto;padding:16px}
+h1{font-size:20px;margin:0 0 12px}
+#pv{width:100%;max-width:300px;display:block;margin:0 auto 14px;border-radius:18px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+label{display:block;font-size:12px;opacity:.75;margin:10px 0 4px}
+label b{float:right;font-weight:400}
+input[type=text],textarea,select{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--bd);background:var(--card);color:var(--fg);font:inherit;font-size:15px}
+input[type=range]{width:100%;accent-color:var(--ac)}
+input[type=file]{width:100%;font-size:13px}
+textarea{min-height:70px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.seg button{padding:10px;border:1px solid var(--bd);background:var(--card);color:var(--fg);border-radius:12px;font:inherit;font-size:14px}
+.seg button.on{background:var(--ac);border-color:var(--ac);color:#fff}
+.box{background:var(--card);border-radius:14px;padding:12px;margin-top:12px}
+.chk{display:flex;gap:16px;font-size:13px;margin-top:10px}.chk label{margin:0;opacity:1}
+#sw{display:flex;gap:10px;flex-wrap:wrap}
+#sw span{width:34px;height:34px;border-radius:50%;border:3px solid transparent;cursor:pointer}
+#sw span.on{border-color:var(--fg)}
+.go{width:100%;margin-top:16px;padding:14px;border:0;border-radius:14px;background:var(--ac);color:#fff;font:inherit;font-weight:600;font-size:16px}
+#out{display:none;margin-top:14px;text-align:center;font-size:13px}
+#out img{width:60%;border-radius:14px;display:block;margin:8px auto}
+</style></head><body>
+<h1>🎵 สร้างการ์ดเพลงลงสตอรี่</h1>
+<canvas id="pv"></canvas>
+<div class="row seg"><button id="sA" class="on">ปกอัลบั้ม</button><button id="sB">เนื้อเพลง</button></div>
+
+<div class="box"><label style="margin-top:0">📸 แคปหน้าจอเพลงที่ฟังอยู่ แล้วให้ AI อ่านข้อมูลให้เอง</label>
+<input id="shot" type="file" accept="image/*"><div id="st" style="font-size:13px;margin-top:6px"></div></div>
+
+<label>ชื่อเพลง</label><input id="t" type="text" value="ชื่อเพลงของฉัน">
+<label>ศิลปิน</label><input id="a" type="text" value="ชื่อศิลปิน">
+<div class="row"><div><label>เวลาที่เล่นอยู่ (นาที:วินาที)</label><input id="tc" type="text" value="1:12"></div><div><label>ความยาวเพลง</label><input id="tt" type="text" value="3:20"></div></div>
+<label>รูปปกอัลบั้ม (ถ้า AI ครอปไม่ได้ เลือกเอง)</label><input id="f" type="file" accept="image/*">
+<label>เนื้อเพลงท่อนที่ชอบ (แบบเนื้อเพลง)</label><textarea id="l">พิมพ์ท่อนที่ชอบตรงนี้</textarea>
+
+<div class="box">
+<label style="margin-top:0">ขนาดปก <b id="v_cs"></b></label><input id="cs" type="range" min="400" max="960" value="840">
+<label>ความโค้งมุมปก <b id="v_cr"></b></label><input id="cr" type="range" min="0" max="240" value="44">
+<label>ตำแหน่งปก (บน-ล่าง) <b id="v_cy"></b></label><input id="cy" type="range" min="120" max="620" value="330">
+<label>ขนาดชื่อเพลง <b id="v_ts"></b></label><input id="ts" type="range" min="36" max="110" value="66">
+<label>ขนาดชื่อศิลปิน <b id="v_as"></b></label><input id="as" type="range" min="28" max="90" value="50">
+<label>ขนาดเนื้อเพลง <b id="v_ls"></b></label><input id="ls" type="range" min="40" max="120" value="84">
+<div class="chk"><label><input id="sb" type="checkbox" checked> แถบเวลา</label><label><input id="sc" type="checkbox" checked> ปุ่มควบคุม</label><label><input id="sa" type="checkbox" checked> ศิลปิน</label></div>
+</div>
+
+<label>ฟอนต์</label>
+<select id="fn"><option>Prompt</option><option>Kanit</option><option>Mitr</option><option>Playfair Display</option><option>Pacifico</option><option>Bebas Neue</option></select>
+<label>ธีมสี</label><div id="sw"></div>
+<button class="go" id="go">สร้างรูปสตอรี่ 9:16</button>
+<div id="out"><div>กดค้างที่รูปแล้วเลือก "บันทึกรูปภาพ" แล้วนำไปลงสตอรี่ได้เลย</div><img id="res" alt=""></div>
+<script>
+const T={auto:null,pink:['#ff7eb3','#7a2cff'],ocean:['#36d1dc','#1d2b64'],sunset:['#ff9966','#ff2d55'],mint:['#a8ff78','#0f7b6c'],night:['#3a3a4a','#0b0b12']};
+const S={style:'A',theme:'auto',img:null,auto:['#fa2d48','#2a0a14']};
+const $=id=>document.getElementById(id),pv=$('pv'),sw=$('sw');
+Object.keys(T).forEach(k=>{const s=document.createElement('span');s.style.background=T[k]?`linear-gradient(135deg,${T[k][0]},${T[k][1]})`:'conic-gradient(#f66,#fc6,#6f9,#6cf,#c6f,#f66)';if(k==='auto')s.classList.add('on');s.onclick=()=>{S.theme=k;[...sw.children].forEach(c=>c.classList.remove('on'));s.classList.add('on');draw(pv)};sw.appendChild(s)});
+function sh(c,a){const n=parseInt(c.slice(1),16),f=v=>Math.max(0,Math.min(255,Math.round(v*a)));return '#'+[n>>16,n>>8&255,n&255].map(v=>f(v).toString(16).padStart(2,'0')).join('')}
+function rr(x,a,b,w,h,r){x.beginPath();x.roundRect(a,b,w,h,Math.min(r,w/2,h/2))}
+function wrap(x,txt,mw){const out=[];txt.split('\n').forEach(p=>{let ln='';for(const ch of p){if(x.measureText(ln+ch).width>mw&&ln){out.push(ln);ln=ch.trim()?ch:''}else ln+=ch}out.push(ln)});return out}
+function secs(s){const p=String(s).split(':').map(Number);if(p.some(isNaN))return 0;return p.length===3?p[0]*3600+p[1]*60+p[2]:(p[0]||0)*60+(p[1]||0)}
+function fmt(n){n=Math.max(0,Math.round(n));return Math.floor(n/60)+':'+String(n%60).padStart(2,'0')}
+function draw(c){
+ const W=1080,H=1920;c.width=W;c.height=H;const x=c.getContext('2d');
+ const col=T[S.theme]||S.auto,F=$('fn').value,t=$('t').value,a=$('a').value;
+ const g=x.createLinearGradient(0,0,W*.4,H);g.addColorStop(0,col[0]);g.addColorStop(1,col[1]);x.fillStyle=g;x.fillRect(0,0,W,H);
+ if(S.img&&S.theme==='auto'){try{x.save();x.filter='blur(70px)';x.globalAlpha=.55;x.drawImage(S.img,-200,-100,W+400,W+400);x.restore()}catch(e){}}
+ x.fillStyle='rgba(0,0,0,.18)';x.fillRect(0,0,W,H);
+ const cover=(px,py,s,r)=>{x.save();x.shadowColor='rgba(0,0,0,.45)';x.shadowBlur=60;x.shadowOffsetY=24;rr(x,px,py,s,s,r);x.fillStyle='#333';x.fill();x.restore();x.save();rr(x,px,py,s,s,r);x.clip();
+  if(S.img)x.drawImage(S.img,px,py,s,s);else{const q=x.createLinearGradient(px,py,px+s,py+s);q.addColorStop(0,'#fff3');q.addColorStop(1,'#0004');x.fillStyle=q;x.fillRect(px,py,s,s);x.fillStyle='#fffc';x.font=`${s*.5}px sans-serif`;x.textAlign='center';x.textBaseline='middle';x.fillText('♪',px+s/2,py+s/2)}x.restore()};
+ x.fillStyle='#fff';x.textBaseline='alphabetic';
+ if(S.style==='A'){
+  const cs=+$('cs').value,cy=+$('cy').value,ts=+$('ts').value,as=+$('as').value;
+  cover((W-cs)/2,cy,cs,+$('cr').value);
+  x.textAlign='left';x.font=`700 ${ts}px "${F}"`;
+  let ty=cy+cs+ts+50;wrap(x,t,840).slice(0,2).forEach(l=>{x.fillText(l,120,ty);ty+=ts*1.15});
+  if($('sa').checked){x.globalAlpha=.75;x.font=`400 ${as}px "${F}"`;x.fillText(a,120,ty+as*.1);x.globalAlpha=1}
+  if($('sb').checked){const tot=secs($('tt').value)||1,cur=Math.min(secs($('tc').value),tot),py=1620;
+   x.fillStyle='rgba(255,255,255,.3)';rr(x,120,py,840,10,5);x.fill();x.fillStyle='#fff';rr(x,120,py,Math.max(10,840*cur/tot),10,5);x.fill();
+   x.font='400 32px sans-serif';x.globalAlpha=.7;x.textAlign='left';x.fillText(fmt(cur),120,py+56);x.textAlign='right';x.fillText('-'+fmt(tot-cur),960,py+56);x.globalAlpha=1}
+  if($('sc').checked){const k=1780;x.fillStyle='#fff';rr(x,505,k-34,22,68,6);x.fill();rr(x,553,k-34,22,68,6);x.fill();
+   x.beginPath();x.moveTo(300,k);x.lineTo(360,k-34);x.lineTo(360,k+34);x.fill();x.beginPath();x.moveTo(740,k);x.lineTo(680,k-34);x.lineTo(680,k+34);x.fill()}
+ }else{
+  const cs=Math.min(+$('cs').value/5.25,200);
+  cover(100,150,cs,+$('cr').value*cs/840*4);x.textAlign='left';x.fillStyle='#fff';
+  const tx=100+cs+35;x.font=`700 44px "${F}"`;x.fillText(t.slice(0,26),tx,150+cs*.45);
+  if($('sa').checked){x.globalAlpha=.75;x.font=`400 36px "${F}"`;x.fillText(a.slice(0,30),tx,150+cs*.45+56);x.globalAlpha=1}
+  let fs=+$('ls').value,ls;x.font=`700 ${fs}px "${F}"`;ls=wrap(x,$('l').value,860);
+  while(ls.length*fs*1.4>1250&&fs>40){fs-=4;x.font=`700 ${fs}px "${F}"`;ls=wrap(x,$('l').value,860)}
+  let y=560;ls.forEach(l=>{x.fillText(l,100,y);y+=fs*1.4});
+ }
+}
+function setAuto(){const k=document.createElement('canvas');k.width=k.height=8;const z=k.getContext('2d');z.drawImage(S.img,0,0,8,8);const d=z.getImageData(0,0,8,8).data;let r=0,g=0,b=0;for(let i=0;i<d.length;i+=4){r+=d[i];g+=d[i+1];b+=d[i+2]}const n=d.length/4,h='#'+[r,g,b].map(v=>Math.round(v/n).toString(16).padStart(2,'0')).join('');S.auto=[sh(h,1.1),sh(h,.35)]}
+const load=f=>new Promise((ok,no)=>{const im=new Image();im.onload=()=>ok(im);im.onerror=no;im.src=URL.createObjectURL(f)});
+$('f').onchange=async e=>{const f=e.target.files[0];if(!f)return;S.img=await load(f);setAuto();draw(pv)};
+$('shot').onchange=async e=>{const f=e.target.files[0];if(!f)return;const st=$('st');st.textContent='⏳ AI กำลังอ่านรูป...';
+ try{
+  const sample=window.claude&&await claude.use('sample');if(!sample)throw new Error('no');
+  const r=await sample.json('นี่คือสกรีนช็อตหน้าเล่นเพลง อ่านข้อมูลแล้วตอบเป็น JSON เท่านั้น ไม่มีข้อความอื่น รูปแบบ {"title":"ชื่อเพลง","artist":"ศิลปิน","cur":"เวลาที่เล่นอยู่ m:ss","tot":"ความยาวเพลง m:ss","lyrics":"เนื้อเพลงที่เห็นในรูป ถ้าไม่มีให้ว่าง","cover":{"x":0,"y":0,"w":0,"h":0}} โดยให้ cover คือกรอบรูปปกอัลบั้มเป็นสัดส่วน 0 ถึง 1 เทียบกับขนาดรูปทั้งภาพ (x,y มุมซ้ายบน) ถ้าไม่เจอปกให้ w และ h เป็น 0 ถ้าไม่เห็นเวลาให้ใส่ค่าว่าง',{images:[f],modelTier:'quick'});
+  if(r.title)$('t').value=r.title;if(r.artist)$('a').value=r.artist;if(r.cur)$('tc').value=r.cur;if(r.tot)$('tt').value=r.tot;if(r.lyrics)$('l').value=r.lyrics;
+  const im=await load(f),c=r.cover;
+  if(c&&c.w>0&&c.h>0){const W=im.naturalWidth,H=im.naturalHeight,s=Math.min(c.w*W,c.h*H),k=document.createElement('canvas');k.width=k.height=512;
+   k.getContext('2d').drawImage(im,c.x*W+(c.w*W-s)/2,c.y*H+(c.h*H-s)/2,s,s,0,0,512,512);S.img=k;setAuto();st.textContent='✅ อ่านเสร็จแล้ว แก้ไขข้อมูลได้ด้านล่าง'}
+  else st.textContent='✅ อ่านข้อมูลแล้ว แต่หาปกไม่เจอ เลือกรูปปกเองด้านล่างได้';
+ }catch(err){st.textContent='⚠️ AI อ่านรูปไม่สำเร็จ (หรือยังไม่อนุญาต) กรอกข้อมูลเองได้เลย'}
+ draw(pv)};
+['t','a','l','tc','tt','cs','cr','cy','ts','as','ls','sb','sc','sa'].forEach(i=>{const el=$(i),v=$('v_'+i);const u=()=>{if(v)v.textContent=el.value;draw(pv)};el.oninput=u;el.onchange=u;if(v)v.textContent=el.value});
+$('fn').onchange=async()=>{try{await document.fonts.load(`700 40px "${$('fn').value}"`,'Aก')}catch(e){}draw(pv)};
+$('sA').onclick=()=>{S.style='A';$('sA').classList.add('on');$('sB').classList.remove('on');draw(pv)};
+$('sB').onclick=()=>{S.style='B';$('sB').classList.add('on');$('sA').classList.remove('on');draw(pv)};
+$('go').onclick=()=>{draw(pv);pv.toBlob(async b=>{$('res').src=URL.createObjectURL(b);$('out').style.display='block';$('res').scrollIntoView({behavior:'smooth'});
+ try{const f=new File([b],'story.png',{type:'image/png'});if(navigator.canShare&&navigator.canShare({files:[f]}))await navigator.share({files:[f]})}catch(e){}})};
+(document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(()=>draw(pv));draw(pv);
+</script></body></html>
